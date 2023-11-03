@@ -1,0 +1,2 @@
+# Real-Time-Movie-Recommender-Powered-by-Elasticsearch-and-Kibana
+This project implements a cutting-edge movie recommendation system that leverages Elasticsearch for data storage and Kibana for data visualization. From data collection and processing with Kafka and Spark Streaming to serving personalized movie recommendations via a RESTful API, this repository contains the complete end-to-end pipeline. 
