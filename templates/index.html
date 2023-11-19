@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Movies</title>
+    <!-- Include Bootstrap CSS -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <!-- <link href="/static/styles.css" rel="stylesheet"> -->
+<style>
+
+
+    /* General Styles */
+body {
+    font-family: 'Roboto', sans-serif; 
+    background-color: #f0f0f0; 
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    width: 90%; /* Adjusted width for the content area */
+    margin: auto;
+}
+
+.movie-card {
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease-in-out;
+    margin-bottom: 20px;
+}
+
+.movie-card:hover {
+    box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2);
+    transform: scale(1.03); /* Slightly smaller scaling effect */
+}
+
+.movie-card .card-body {
+    padding: 20px;
+}
+
+.movie-card .card-title {
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+
+.movie-card .card-text {
+    font-size: 16px;
+    color: #555;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    height: 80px;
+}
+
+/* Navbar Styles */
+.navbar {
+    background-color: #032541; 
+}
+
+.navbar-brand {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.navbar-brand,
+.navbar-nav .nav-link {
+    color: #fff !important; /* White text color for links */
+}
+
+.navbar-brand:hover,
+.navbar-nav .nav-link:hover {
+    color: #ddd !important; /* Lighter text color on hover */
+}
+
+.form-inline .form-control {
+    width: 300px; /* Adjusted search input width */
+}
+
+.form-inline .btn {
+    background-color: #f0c14b; 
+    color: #000;
+    border: none;
+}
+
+.form-inline .btn:hover {
+    background-color: #d8ab25; /* Darker yellow on hover */
+}
+
+</style>
+    <script>
+        function toggleOverview(index) {
+            var dots = document.getElementById("dots" + index);
+            var moreText = document.getElementById("more" + index);
+            var btnText = document.getElementById("show-more-btn" + index);
+    
+            if (dots.style.display === "none") {
+                dots.style.display = "inline";
+                moreText.style.display = "none";
+                btnText.innerHTML = "Show more";
+            } else {
+                dots.style.display = "none";
+                moreText.style.display = "inline";
+                btnText.innerHTML = "Show less";
+            }
+        }
+    </script>
+</head>
+<body>
+    <body>
+
+        <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
+            <a class="navbar-brand" href="#">Movies</a>
+            <div class="mx-auto order-0">
+                <form class="form-inline" action="/recommendations" method="GET">
+                    <input class="form-control mr-sm-2" type="text" placeholder="Search by movie title" name="title">
+                    <button class="btn btn-outline-light my-2 my-sm-0" type="submit">Search</button>
+                </form>
+            </div>
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('index') }}">Home</a>
+                </li>
+            </ul>
+        </nav>
+        
+        <div class="container mt-5 pt-5">
+        
+
+        <!-- Displaying Searched Movie Details and Recommended Movies -->
+{% if movie %}
+<div class="searched-movie">
+    <h2>Searched Movie</h2>
+    <div class="row">
+        <div class="col-12">
+            <div class="card movie-card">
+                <div class="row" style="padding-left: 3%;">
+                    <div class="col-md-4">
+                        {% if movie['poster_path'] %}
+                            <img src="https://www.themoviedb.org/t/p/w300_and_h450_bestv2{{ movie['poster_path'] }}" class="card-img-top mt-3 mb-3" alt="{{ movie['title'] }}" style="width: 300px; height: 350px; margin-right: 40px;">
+                        {% else %}
+                            <img src="https://via.placeholder.com/200x300.png?text=Poster+Not+Available" class="card-img-top mt-3 mb-3" alt="{{ movie['title'] }}" style="width: 300px; height: 350px;">
+                        {% endif %}
+                    </div>
+                    <div class="col-md-8 align-self-center">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ movie['title'] }}</h5>
+                            <p><strong>Release date:</strong> {{ movie['release_date'] }}</p>
+                            <p><strong>Genres:</strong>
+                                {% for genre in movie['genres'] %}
+                                    {{ genre['name'] }}{% if not loop.last %}, {% endif %}
+                                {% endfor %}
+                            </p>
+                            <p><strong>Popularity:</strong> {{ movie['popularity'] }}</p>
+                            <p><strong>Vote Average:</strong> {{ movie['vote_average'] }}</p>
+                            <p><strong>Overview:</strong>
+                                {% if movie['overview'] %}
+                                    <span id="overview">{{ movie['overview'] }}</span>
+                                {% else %}
+                                    N/A
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="recommended-movies">
+    <h2>Recommended Movies</h2>
+    <div class="row">
+        {% for recommended_movie in similar_movies %}
+            <div class="col-md-6">
+                <div class="card movie-card">
+                    <div class="row">
+                        <div class="col-md-4">
+                            {% if recommended_movie['poster_path'] %}
+                                <img src="https://www.themoviedb.org/t/p/w300_and_h450_bestv2{{ recommended_movie['poster_path'] }}" class="card-img-top mt-3 mb-3" alt="{{ recommended_movie['title'] }}" style="width: 180px; height: 250px;">
+                            {% else %}
+                                <img src="https://via.placeholder.com/200x300.png?text=Poster+Not+Available" class="card-img-top mt-3 mb-3" alt="{{ recommended_movie['title'] }}" style="width: 180px; height: 250px;">
+                            {% endif %}
+                        </div>
+                        <div class="col-md-8 align-self-center">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ recommended_movie['title'] }}</h5>
+                                <p><strong>Release date:</strong> {{ recommended_movie['release_date'] }}</p>
+                                <p><strong>Genres:</strong>
+                                    {% for genre in recommended_movie['genres'] %}
+                                        {{ genre['name'] }}{% if not loop.last %}, {% endif %}
+                                    {% endfor %}
+                                </p>
+                                <p><strong>Popularity:</strong> {{ recommended_movie['popularity'] }}</p>
+                                <p><strong>Vote Average:</strong> {{ recommended_movie['vote_average'] }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+<!-- Button to go back to default movies section -->
+<div class="back-to-home">
+    <a href="{{ url_for('index') }}" class="btn btn-primary">Back to Home</a>
+</div>
+{% else %}
+      <!-- Movie Cards (Default Movies Section) -->
+<div class="row">
+    {% for movie in movies %}
+        <div class="col-md-6">
+            <div class="card movie-card">
+                <div class="row" style="padding-left: 3%;">
+                    <div class="col-md-4">
+                        {% if movie['belongs_to_collection'] is defined %}
+                            <img src="https://www.themoviedb.org/t/p/w300_and_h450_bestv2{{ movie['belongs_to_collection']['poster_path'] }}" class="card-img-top mt-3 mb-3" alt="{{ movie['title'] }}" style="width: 180px; height: 250px; margin-right: 40;">
+                        {% else %}
+                            <img src="https://via.placeholder.com/200x300.png?text=Poster+Not+Available" class="card-img-top mt-3 mb-3" alt="{{ movie['title'] }}" style="width: 180px; height: 250px;">
+                        {% endif %}
+                    </div>
+                    <div class="col-md-8 align-self-center">
+                        <div class="card-body" >
+                            <h5 class="card-title">{{ movie['title'] }}</h5>
+                            <p><strong>Release date:</strong> {{ movie['release_date'] }}</p>
+                            <p><strong>Genres:</strong>
+                                {% for genre in movie['genres_name'] %}
+                                    {{ genre }}{% if not loop.last %}, {% endif %}
+                                {% endfor %}
+                            </p>
+                            <p><strong>Popularity:</strong> {{ movie['popularity'] }}</p>
+                            <p><strong>Vote Average:</strong> {{ movie['vote_average'] }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="row" >
+                    <div class="col-md-12 ">
+                        <div class="card-body" style="padding-top: -10% ;">
+                            <p><strong>Overview:</strong>
+                                {% if movie['overview'] %}
+                                    <span id="overview{{ loop.index }}">
+                                        {% if movie['overview']|length > 100 %}
+                                            {{ movie['overview'][:100] }}<span id="dots{{ loop.index }}">...</span><span id="more{{ loop.index }}" style="display: none;">{{ movie['overview'][100:] }}</span>
+                                            <button class="btn btn-link" type="button" onclick="toggleOverview('{{ loop.index }}')">Show more</button>
+                                        {% else %}
+                                            {{ movie['overview'] }}
+                                        {% endif %}
+                                    </span>
+                                {% else %}
+                                    N/A
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+            <!-- Pagination -->
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center">
+                    {% if start_page > 1 %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('index', page=1) }}">First</a>
+                        </li>
+                    {% endif %}
+                    {% if current_page > 1 %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('index', page=current_page-1) }}">Previous</a>
+                        </li>
+                    {% endif %}
+    
+                    {% if start_page > 3 %}
+                        <li class="page-item disabled">
+                            <span class="page-link">...</span>
+                        </li>
+                    {% endif %}
+    
+                    {% for page_num in range(start_page, end_page) %}
+                        <li class="page-item {% if page_num == current_page %}active{% endif %}">
+                            <a class="page-link" href="{{ url_for('index', page=page_num) }}">{{ page_num }}</a>
+                        </li>
+                    {% endfor %}
+    
+                    {% if end_page < total_pages - 2 %}
+                        <li class="page-item disabled">
+                            <span class="page-link">...</span>
+                        </li>
+                    {% endif %}
+                    {% if end_page < total_pages - 1 %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('index', page=total_pages) }}">{{ total_pages }}</a>
+                        </li>
+                    {% endif %}
+    
+                    {% if current_page < total_pages %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('index', page=current_page+1) }}">Next</a>
+                        </li>
+                    {% endif %}
+                    {% if end_page < total_pages %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('index', page=total_pages) }}">Last</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% endif %}
+        <!-- Pagination -->
+
+    </div>
+
+    <!-- Bootstrap JS and jQuery (required for Bootstrap) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
