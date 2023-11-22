@@ -114,9 +114,8 @@ Reads movie data from the Kafka topic and stores it into Elasticsearch for stora
         ```
 
 ## Architecture
-![Architecture Diagram](link-to-your-architecture-diagram)
 
-The Real-Time Movie Recommender architecture involves Elasticsearch as the data store, Kibana for data visualization, and Spark/Kafka (if applicable) for real-time data processing. Describe how data flows through the system and the role of each component.
+The Real-Time Movie Recommender architecture involves Elasticsearch as the data store, Kibana for data visualization, and Spark/Kafka  for real-time data processing.
 
 ## API
 ### Endpoints
